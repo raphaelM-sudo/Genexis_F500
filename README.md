@@ -87,6 +87,11 @@ service dnsmasq restart
 Mein Raspberry Pi ist unter `192.168.1.31` erreichbar. Diese IP auf die eure abändern.
 Ich habe zusätzlich den Cloudflare DNS `1.1.1.1` als Failsafe hinzugefügt.
 ```
+uci -q delete dhcp.lan.dhcp_option
+uci add_list dhcp.lan.dhcp_option="6,192.168.1.31,1.1.1.1"
+uci commit dhcp
+service dnsmasq restart
+
 uci -q delete network.wan.dns
 uci add_list network.wan.dns="192.168.1.31"
 uci add_list network.wan.dns="1.1.1.1"
@@ -95,7 +100,15 @@ uci commit network
 service network restart
 ```
 
-## 7. Optional: Firewall-Regel Gäste-Netzwerk
+## 7. Optional: Gäste-Netzwerk
+Falls ihr das default Gäste-Netzwerk verwenden wollt, muss ebenfalls DNS über DHCP konfiguriert werden:
+```
+uci -q delete dhcp.guest.dhcp_option
+uci add_list dhcp.guest.dhcp_option="6,192.168.1.31,1.1.1.1"
+uci commit dhcp
+service dnsmasq restart
+```
+### Firewall-Regel
 Damit man im Gästenetzwerk auf den DNS-Server im LAN Zugriff hat, muss folgende Regel erstellt werden:
 ```
 uci set firewall.guest_rule_local_dns="rule"
@@ -123,3 +136,4 @@ Ich habe versucht die Anleitung möglichst einfach zu halten und wollte das root
 Auf der Suche nach dem Passwort bin ich auch auf folgenden Forenpost gestoßen, der ebenfalls interessant sein könnte: [IOPSYS EG400 - ein Modem vom selben Hersteller](https://forum.openwrt.org/t/iopsys-eg400-possible-to-run-up-to-date-openwrt/20673)
 
 Mein nächstes Ziel ist es, auf dem F500 das originale OpenWRT zu installieren.
+
